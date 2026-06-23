@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AES-256-GCM Cryptography Web Tool</title>
+    <!-- Import Google Fonts (Outfit and Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --input-bg: rgba(15, 23, 42, 0.6);
+            --input-border: rgba(255, 255, 255, 0.1);
+            --font-display: 'Outfit', 'Inter', sans-serif;
+            --font-sans: 'Inter', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1rem;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Container */
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 3rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #818cf8, #c084fc, #e879f9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Secure Local Process Badge */
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+
+        /* Tabs Styles */
+        .tabs {
+            display: flex;
+            background: rgba(15, 23, 42, 0.4);
+            padding: 0.3rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            border: 1px solid var(--input-border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.8rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: var(--text-primary);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Group Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 12px;
+            padding: 0.9rem 1.2rem;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            transition: all 0.25s ease;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Key Input with Generator Action */
+        .key-input-container {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--input-border);
+            color: var(--text-primary);
+            padding: 0 1.2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Status & Feedback Panel */
+        .key-status {
+            font-size: 0.8rem;
+            margin-top: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .status-valid { color: var(--accent-green); }
+        .status-invalid { color: var(--accent-red); }
+
+        /* Action Panel styling */
+        .action-container {
+            margin-top: 2rem;
+            border-top: 1px solid var(--card-border);
+            padding-top: 2rem;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            border: none;
+            color: var(--text-primary);
+            padding: 1.1rem;
+            border-radius: 12px;
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Section switcher */
+        .section-switch {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .switch-option {
+            flex: 1;
+            padding: 0.6rem;
+            text-align: center;
+            border: 1px solid var(--input-border);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .switch-option.active {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+            color: var(--text-primary);
+        }
+
+        /* Upload Drag & Drop Area */
+        .file-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background: rgba(15, 23, 42, 0.2);
+        }
+
+        .file-zone:hover, .file-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .file-zone svg {
+            width: 48px;
+            height: 48px;
+            stroke: var(--text-secondary);
+            margin-bottom: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .file-zone:hover svg {
+            stroke: var(--primary);
+            transform: translateY(-4px);
+        }
+
+        .file-info {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* Toggle Button style for Line-by-Line */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            background: rgba(15, 23, 42, 0.3);
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            border: 1px solid var(--input-border);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.15);
+            transition: .3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-green);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        .toggle-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toggle-subtext {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.1rem;
+        }
+
+        /* Output Box stylings */
+        .output-container {
+            margin-top: 2rem;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .output-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            text-transform: uppercase;
+        }
+
+        .btn-copy {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--input-border);
+            color: var(--text-secondary);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-copy:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .output-text {
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #1e293b;
+            border-left: 4px solid var(--primary);
+            color: var(--text-primary);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 100;
+            font-size: 0.9rem;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.5rem;
+            }
+            .key-input-container {
+                flex-direction: column;
+            }
+            .btn-secondary {
+                padding: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>AES-256-GCM Encrypt/Decrypt</h1>
+            <p class="subtitle">เครื่องมือเข้ารหัสและถอดรหัสข้อมูล AES-256-GCM ด้วยเว็บเบราว์เซอร์อย่างปลอดภัย</p>
+            <div class="security-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                คำนวณในเครื่องของคุณโดยตรง (ข้อมูลไม่มีวันรั่วไหลออกสู่อินเทอร์เน็ต)
+            </div>
+        </header>
+
+        <!-- Mode Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-encrypt" onclick="setMode('encrypt')">เข้ารหัส (Encrypt)</button>
+            <button class="tab-btn" id="tab-decrypt" onclick="setMode('decrypt')">ถอดรหัส (Decrypt)</button>
+        </div>
+
+        <!-- 1. Key Inputs -->
+        <div class="form-group">
+            <label for="crypt-key">คีย์สำหรับเข้ารหัส (AES Key)</label>
+            <div class="key-input-container">
+                <input type="text" id="crypt-key" placeholder="วางคีย์ Hex (64 ตัวอักษร) หรือ Base64 (44 ตัวอักษร)" oninput="validateKey()">
+                <button class="btn-secondary" onclick="generateRandomKey('hex')">สุ่มคีย์ Hex</button>
+                <button class="btn-secondary" onclick="generateRandomKey('base64')">สุ่มคีย์ Base64</button>
+            </div>
+            <div id="key-status-msg" class="key-status status-invalid">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                กรุณาระบุคีย์ขนาด 256 บิต (Hex 64 ตัวอักษร หรือ Base64 44 ตัวอักษร)
+            </div>
+        </div>
+
+        <!-- Input Type Options (Text vs File) -->
+        <div class="section-switch">
+            <div class="switch-option active" id="opt-text" onclick="setInputType('text')">พิมพ์ข้อความ (Text)</div>
+            <div class="switch-option" id="opt-file" onclick="setInputType('file')">อัปโหลดไฟล์ (File)</div>
+        </div>
+
+        <!-- Text Input Section -->
+        <div id="section-text-input">
+            <div class="form-group">
+                <label id="input-text-label" for="input-text">ข้อความธรรมดา (Plaintext)</label>
+                <textarea id="input-text" placeholder="พิมพ์หรือวางข้อความที่นี่..."></textarea>
+            </div>
+        </div>
+
+        <!-- File Input Section -->
+        <div id="section-file-input" style="display: none;">
+            <div class="form-group">
+                <label>อัปโหลดไฟล์ที่ต้องการ</label>
+                <div class="file-zone" id="drop-zone" onclick="document.getElementById('file-upload').click()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    <p style="font-weight: 600; margin-bottom: 0.25rem;">คลิกเพื่ออัปโหลด หรือลากไฟล์มาวางที่นี่</p>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">รองรับไฟล์ทุกประเภท (ขนาดยอดนิยมไม่เกิน 100MB)</p>
+                    <div class="file-info" id="file-info-text"></div>
+                    <input type="file" id="file-upload" style="display: none;" onchange="handleFileSelect(event)">
+                </div>
+            </div>
+
+            <!-- Line by Line Toggle for Text Files -->
+            <div class="toggle-container">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="line-by-line-toggle">
+                    <span class="slider"></span>
+                </label>
+                <div>
+                    <span class="toggle-label" onclick="document.getElementById('line-by-line-toggle').click()">โหมดจัดทำทีละบรรทัด (Line-by-Line)</span>
+                    <span class="toggle-subtext">เหมาะสำหรับไฟล์รายการ เช่น ไฟล์รายชื่อไอดี/เลขบัตรประชาชน (จะเข้ารหัสทีละบรรทัดแยกจากกัน)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Execute Action Button -->
+        <div class="action-container">
+            <button class="btn-primary" id="btn-action" onclick="executeCrypto()">เริ่มเข้ารหัสข้อความ</button>
+        </div>
+
+        <!-- Output Display Section -->
+        <div class="output-container" id="output-box">
+            <div class="output-header">
+                <span class="output-title" id="output-box-title">ข้อความที่เข้ารหัสแล้ว (Base64)</span>
+                <button class="btn-copy" id="btn-copy-action" onclick="copyOutputToClipboard()">คัดลอกผลลัพธ์</button>
+            </div>
+            <div class="output-text" id="output-content"></div>
+        </div>
+    </div>
+
+    <!-- Toast UI element -->
+    <div class="toast" id="toast">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span id="toast-text">คัดลอกผลลัพธ์ไปยัง Clipboard แล้ว</span>
+    </div>
+
+    <script>
+        let currentMode = 'encrypt'; // 'encrypt' or 'decrypt'
+        let currentInputType = 'text'; // 'text' or 'file'
+        let selectedFile = null;
+
+        // Base64 & Bytes convert helper functions
+        function base64ToBytes(base64) {
+            const binString = atob(base64);
+            return Uint8Array.from(binString, (m) => m.charCodeAt(0));
+        }
+
+        function bytesToBase64(bytes) {
+            const binString = Array.from(bytes, (x) => String.fromCharCode(x)).join("");
+            return btoa(binString);
+        }
+
+        function hexToBytes(hex) {
+            hex = hex.replace(/\s+/g, '').replace(/[-:]/g, '');
+            const bytes = new Uint8Array(hex.length / 2);
+            for (let i = 0; i < bytes.length; i++) {
+                bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+            }
+            return bytes;
+        }
+
+        function bytesToHex(bytes) {
+            return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // Initialize drag & drop triggers
+        const dropZone = document.getElementById('drop-zone');
+        if (dropZone) {
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    selectedFile = files[0];
+                    showFileInfo();
+                }
+            }, false);
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                selectedFile = files[0];
+                showFileInfo();
+            }
+        }
+
+        function showFileInfo() {
+            const infoText = document.getElementById('file-info-text');
+            if (selectedFile) {
+                const sizeStr = (selectedFile.size / 1024).toFixed(2) + " KB";
+                infoText.innerHTML = `ไฟล์ที่เลือก: <strong>${selectedFile.name}</strong> (${sizeStr})`;
+            } else {
+                infoText.innerText = '';
+            }
+        }
+
+        // Tab switcher
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${mode}`).classList.add('active');
+            
+            const btnAction = document.getElementById('btn-action');
+            const outputBoxTitle = document.getElementById('output-box-title');
+            const textInputLabel = document.getElementById('input-text-label');
+            const inputText = document.getElementById('input-text');
+
+            if (mode === 'encrypt') {
+                btnAction.innerText = currentInputType === 'text' ? 'เริ่มเข้ารหัสข้อความ' : 'เริ่มเข้ารหัสไฟล์';
+                textInputLabel.innerText = 'ข้อความธรรมดา (Plaintext)';
+                inputText.placeholder = 'พิมพ์หรือวางข้อความธรรมดาที่นี่...';
+                if (outputBoxTitle) outputBoxTitle.innerText = 'ข้อความที่เข้ารหัสแล้ว (Base64)';
+            } else {
+                btnAction.innerText = currentInputType === 'text' ? 'เริ่มถอดรหัสข้อความ' : 'เริ่มถอดรหัสไฟล์';
+                textInputLabel.innerText = 'ข้อความที่เข้ารหัสมา (Base64)';
+                inputText.placeholder = 'วางข้อความที่เข้ารหัสแบบ Base64 ที่นี่...';
+                if (outputBoxTitle) outputBoxTitle.innerText = 'ข้อความที่ถอดรหัสแล้ว (Plaintext)';
+            }
+            
+            // Clear outputs
+            document.getElementById('output-box').style.display = 'none';
+        }
+
+        // Input type switch (Text vs File)
+        function setInputType(type) {
+            currentInputType = type;
+            document.querySelectorAll('.switch-option').forEach(opt => opt.classList.remove('active'));
+            document.getElementById(`opt-${type}`).classList.add('active');
+
+            if (type === 'text') {
+                document.getElementById('section-text-input').style.display = 'block';
+                document.getElementById('section-file-input').style.display = 'none';
+                document.getElementById('btn-action').innerText = currentMode === 'encrypt' ? 'เริ่มเข้ารหัสข้อความ' : 'เริ่มถอดรหัสข้อความ';
+            } else {
+                document.getElementById('section-text-input').style.display = 'none';
+                document.getElementById('section-file-input').style.display = 'block';
+                document.getElementById('btn-action').innerText = currentMode === 'encrypt' ? 'เริ่มเข้ารหัสไฟล์' : 'เริ่มถอดรหัสไฟล์';
+            }
+            
+            // Clear outputs
+            document.getElementById('output-box').style.display = 'none';
+        }
+
+        // Validate AES Key length (64 hex characters or 44 base64 characters)
+        function validateKey() {
+            const keyInput = document.getElementById('crypt-key').value.trim();
+            const statusMsg = document.getElementById('key-status-msg');
+            const cleanKey = keyInput.replace(/\s+/g, '').replace(/[-:]/g, '');
+
+            let isValid = false;
+            let keyType = '';
+
+            // Check if 64-char Hex (32 bytes)
+            if (cleanKey.length === 64 && /^[0-9a-fA-F]{64}$/.test(cleanKey)) {
+                isValid = true;
+                keyType = 'Hex (256-bit)';
+            }
+            // Check if 44-char Base64 (32 bytes)
+            else if (keyInput.length === 44) {
+                try {
+                    const decoded = atob(keyInput);
+                    if (decoded.length === 32) {
+                        isValid = true;
+                        keyType = 'Base64 (256-bit)';
+                    }
+                } catch(e) {}
+            }
+
+            if (isValid) {
+                statusMsg.className = 'key-status status-valid';
+                statusMsg.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>คีย์ถูกต้อง: ${keyType}`;
+                return true;
+            } else {
+                statusMsg.className = 'key-status status-invalid';
+                statusMsg.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>กรุณาระบุคีย์ขนาด 256 บิต (Hex 64 ตัวอักษร หรือ Base64 44 ตัวอักษร)`;
+                return false;
+            }
+        }
+
+        // Generate Crypto Secure Key
+        function generateRandomKey(format) {
+            const keyBytes = window.crypto.getRandomValues(new Uint8Array(32));
+            const keyInput = document.getElementById('crypt-key');
+            
+            if (format === 'hex') {
+                keyInput.value = bytesToHex(keyBytes);
+            } else {
+                keyInput.value = bytesToBase64(keyBytes);
+            }
+            validateKey();
+            showToast("สุ่มและกรอกคีย์ขนาด 256 บิตใหม่เรียบร้อยแล้ว");
+        }
+
+        // Convert the input key to Uint8Array
+        function getKeyBytes() {
+            const keyInput = document.getElementById('crypt-key').value.trim();
+            const cleanKey = keyInput.replace(/\s+/g, '').replace(/[-:]/g, '');
+
+            if (cleanKey.length === 64 && /^[0-9a-fA-F]{64}$/.test(cleanKey)) {
+                return hexToBytes(cleanKey);
+            }
+            return base64ToBytes(keyInput);
+        }
+
+        // Toast notifications
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function copyOutputToClipboard() {
+            const content = document.getElementById('output-content').innerText;
+            if (content) {
+                navigator.clipboard.writeText(content);
+                showToast("คัดลอกผลลัพธ์ไปยัง Clipboard เรียบร้อยแล้ว");
+            }
+        }
+
+        // Web Crypto API Operations
+        async function executeCrypto() {
+            if (!validateKey()) {
+                alert("กรุณาป้อนคีย์ที่ถูกต้องก่อนเริ่มประมวลผล");
+                return;
+            }
+
+            const keyBytes = getKeyBytes();
+            let cryptoKey;
+            
+            try {
+                cryptoKey = await window.crypto.subtle.importKey(
+                    "raw",
+                    keyBytes,
+                    { name: "AES-GCM" },
+                    false,
+                    ["encrypt", "decrypt"]
+                );
+            } catch(e) {
+                alert("เกิดข้อผิดพลาดในการนำเข้าคีย์: " + e.message);
+                return;
+            }
+
+            if (currentInputType === 'text') {
+                await handleTextOperation(cryptoKey);
+            } else {
+                await handleFileOperation(cryptoKey);
+            }
+        }
+
+        // --- Text Encryption / Decryption ---
+        async function handleTextOperation(cryptoKey) {
+            const inputText = document.getElementById('input-text').value;
+            const outputBox = document.getElementById('output-box');
+            const outputContent = document.getElementById('output-content');
+            const copyBtn = document.getElementById('btn-copy-action');
+
+            if (!inputText) {
+                alert("กรุณากรอกข้อความก่อนเริ่มต้นการทำงาน");
+                return;
+            }
+
+            try {
+                if (currentMode === 'encrypt') {
+                    // Encrypt
+                    const encoder = new TextEncoder();
+                    const plainBytes = encoder.encode(inputText);
+                    
+                    // Generate random 12-byte IV (Nonce)
+                    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+                    
+                    // Web Crypto AES-GCM Encrypt (produces [Ciphertext] + [16-byte Tag])
+                    const encryptedBuffer = await window.crypto.subtle.encrypt(
+                        { name: "AES-GCM", iv: iv, tagLength: 128 },
+                        cryptoKey,
+                        plainBytes
+                    );
+                    
+                    const encryptedBytes = new Uint8Array(encryptedBuffer);
+                    
+                    // Re-layout into combined buffer: [Nonce (12B)] + [Tag (16B)] + [Ciphertext]
+                    const tagBytes = encryptedBytes.slice(encryptedBytes.length - 16);
+                    const ciphertextBytes = encryptedBytes.slice(0, encryptedBytes.length - 16);
+                    
+                    const combined = new Uint8Array(12 + 16 + ciphertextBytes.length);
+                    combined.set(iv, 0);
+                    combined.set(tagBytes, 12);
+                    combined.set(ciphertextBytes, 28);
+                    
+                    // Display Base64
+                    outputContent.innerText = bytesToBase64(combined);
+                    copyBtn.style.display = 'block';
+                } else {
+                    // Decrypt
+                    const combinedBytes = base64ToBytes(inputText);
+                    if (combinedBytes.length < 28) {
+                        throw new Error("ขนาดข้อมูลเข้ารหัสไม่ถูกต้อง (ต้องไม่ต่ำกว่า 28 bytes)");
+                    }
+
+                    // Extract parts
+                    const iv = combinedBytes.slice(0, 12);
+                    const tagBytes = combinedBytes.slice(12, 28);
+                    const ciphertextBytes = combinedBytes.slice(28);
+
+                    // Reconstruct Web Crypto format: [Ciphertext] + [Tag]
+                    const webCryptoCiphertext = new Uint8Array(ciphertextBytes.length + 16);
+                    webCryptoCiphertext.set(ciphertextBytes, 0);
+                    webCryptoCiphertext.set(tagBytes, ciphertextBytes.length);
+
+                    // Decrypt
+                    const decryptedBuffer = await window.crypto.subtle.decrypt(
+                        { name: "AES-GCM", iv: iv, tagLength: 128 },
+                        cryptoKey,
+                        webCryptoCiphertext
+                    );
+
+                    const decoder = new TextDecoder();
+                    outputContent.innerText = decoder.decode(decryptedBuffer);
+                    copyBtn.style.display = 'block';
+                }
+                
+                outputBox.style.display = 'block';
+                outputBox.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (e) {
+                alert("การประมวลผลล้มเหลว: " + e.message + "\n(กรุณาตรวจสอบว่าข้อมูลคีย์และข้อความที่นำเข้ามาถอดรหัสตรงกันหรือไม่)");
+            }
+        }
+
+        // --- File Encryption / Decryption ---
+        async function handleFileOperation(cryptoKey) {
+            if (!selectedFile) {
+                alert("กรุณาเลือกไฟล์ก่อนกดเริ่มต้นการทำงาน");
+                return;
+            }
+
+            const isLineByLine = document.getElementById('line-by-line-toggle').checked;
+            const reader = new FileReader();
+
+            if (isLineByLine) {
+                // Read as text for Line-by-Line processing
+                reader.readAsText(selectedFile);
+                reader.onload = async function(e) {
+                    const text = e.target.result;
+                    const lines = text.split(/\r?\n/);
+                    const outputLines = [];
+
+                    try {
+                        if (currentMode === 'encrypt') {
+                            const encoder = new TextEncoder();
+                            for (let i = 0; i < lines.length; i++) {
+                                const line = lines[i];
+                                // Encrypt each non-empty line
+                                if (line) {
+                                    const plainBytes = encoder.encode(line);
+                                    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+                                    
+                                    const encryptedBuffer = await window.crypto.subtle.encrypt(
+                                        { name: "AES-GCM", iv: iv, tagLength: 128 },
+                                        cryptoKey,
+                                        plainBytes
+                                    );
+                                    const encryptedBytes = new Uint8Array(encryptedBuffer);
+                                    
+                                    const tagBytes = encryptedBytes.slice(encryptedBytes.length - 16);
+                                    const ciphertextBytes = encryptedBytes.slice(0, encryptedBytes.length - 16);
+                                    
+                                    const combined = new Uint8Array(12 + 16 + ciphertextBytes.length);
+                                    combined.set(iv, 0);
+                                    combined.set(tagBytes, 12);
+                                    combined.set(ciphertextBytes, 28);
+                                    
+                                    outputLines.push(bytesToBase64(combined));
+                                } else {
+                                    outputLines.push('');
+                                }
+                            }
+                        } else {
+                            const decoder = new TextDecoder();
+                            for (let i = 0; i < lines.length; i++) {
+                                const line = lines[i].trim();
+                                if (line) {
+                                    const combinedBytes = base64ToBytes(line);
+                                    if (combinedBytes.length < 28) continue;
+                                    
+                                    const iv = combinedBytes.slice(0, 12);
+                                    const tagBytes = combinedBytes.slice(12, 28);
+                                    const ciphertextBytes = combinedBytes.slice(28);
+                                    
+                                    const webCryptoCiphertext = new Uint8Array(ciphertextBytes.length + 16);
+                                    webCryptoCiphertext.set(ciphertextBytes, 0);
+                                    webCryptoCiphertext.set(tagBytes, ciphertextBytes.length);
+                                    
+                                    const decryptedBuffer = await window.crypto.subtle.decrypt(
+                                        { name: "AES-GCM", iv: iv, tagLength: 128 },
+                                        cryptoKey,
+                                        webCryptoCiphertext
+                                    );
+                                    outputLines.push(decoder.decode(decryptedBuffer));
+                                } else {
+                                    outputLines.push('');
+                                }
+                            }
+                        }
+
+                        // Trigger file download
+                        const outputText = outputLines.join('\r\n');
+                        const blob = new Blob([outputText], { type: 'text/plain;charset=utf-8' });
+                        downloadBlob(blob, getTargetFileName(selectedFile.name));
+                        showToast("ดาวน์โหลดไฟล์เข้ารหัสสำเร็จแล้ว");
+
+                    } catch(err) {
+                        alert("เกิดข้อผิดพลาดในการประมวลผลไฟล์ทีละบรรทัด: " + err.message);
+                    }
+                };
+            } else {
+                // Read as ArrayBuffer for binary file processing
+                reader.readAsArrayBuffer(selectedFile);
+                reader.onload = async function(e) {
+                    const fileBytes = new Uint8Array(e.target.result);
+
+                    try {
+                        if (currentMode === 'encrypt') {
+                            // Encrypt File binary
+                            const iv = window.crypto.getRandomValues(new Uint8Array(12));
+                            const encryptedBuffer = await window.crypto.subtle.encrypt(
+                                { name: "AES-GCM", iv: iv, tagLength: 128 },
+                                cryptoKey,
+                                fileBytes
+                            );
+                            const encryptedBytes = new Uint8Array(encryptedBuffer);
+                            
+                            const tagBytes = encryptedBytes.slice(encryptedBytes.length - 16);
+                            const ciphertextBytes = encryptedBytes.slice(0, encryptedBytes.length - 16);
+                            
+                            const combined = new Uint8Array(12 + 16 + ciphertextBytes.length);
+                            combined.set(iv, 0);
+                            combined.set(tagBytes, 12);
+                            combined.set(ciphertextBytes, 28);
+
+                            const blob = new Blob([combined], { type: 'application/octet-stream' });
+                            downloadBlob(blob, selectedFile.name + '.enc');
+                        } else {
+                            // Decrypt File binary
+                            if (fileBytes.length < 28) {
+                                throw new Error("ไฟล์เข้ารหัสมีขนาดเล็กเกินกว่ามาตรฐาน");
+                            }
+                            
+                            const iv = fileBytes.slice(0, 12);
+                            const tagBytes = fileBytes.slice(12, 28);
+                            const ciphertextBytes = fileBytes.slice(28);
+
+                            const webCryptoCiphertext = new Uint8Array(ciphertextBytes.length + 16);
+                            webCryptoCiphertext.set(ciphertextBytes, 0);
+                            webCryptoCiphertext.set(tagBytes, ciphertextBytes.length);
+
+                            const decryptedBuffer = await window.crypto.subtle.decrypt(
+                                { name: "AES-GCM", iv: iv, tagLength: 128 },
+                                cryptoKey,
+                                webCryptoCiphertext
+                            );
+
+                            const blob = new Blob([decryptedBuffer], { type: 'application/octet-stream' });
+                            downloadBlob(blob, getDecryptedFileName(selectedFile.name));
+                        }
+                        showToast("ดาวน์โหลดไฟล์ผลลัพธ์สำเร็จแล้ว");
+
+                    } catch(err) {
+                        alert("เกิดข้อผิดพลาดในการประมวลผลไฟล์ไบนารี: " + err.message);
+                    }
+                };
+            }
+        }
+
+        // Help select appropriate filename for downloaded files
+        function getTargetFileName(name) {
+            if (currentMode === 'encrypt') {
+                const parts = name.split('.');
+                if (parts.length > 1) {
+                    parts[parts.length - 2] += '_enc';
+                    return parts.join('.');
+                }
+                return name + '_enc';
+            }
+            return getDecryptedFileName(name);
+        }
+
+        function getDecryptedFileName(name) {
+            if (name.endsWith('.enc')) {
+                return name.substring(0, name.length - 4);
+            }
+            const parts = name.split('.');
+            if (parts.length > 1) {
+                if (parts[parts.length - 2].endsWith('_enc')) {
+                    parts[parts.length - 2] = parts[parts.length - 2].substring(0, parts[parts.length - 2].length - 4) + '_dec';
+                } else {
+                    parts[parts.length - 2] += '_dec';
+                }
+                return parts.join('.');
+            }
+            return name + '_dec';
+        }
+
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
